@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-sqlserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqlserver
+  template:
+    metadata:
+      labels:
+        app: sqlserver
+    spec:
+      containers:
+        - name: mssql
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          ports:
+            - containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_PID
+              value: "Developer"
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: casino-secret
+                  key: db-password
+
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1000m"
+          # Healthcheck (Liveness Probe) giúp K8s biết khi nào DB sẵn sàng
+          livenessProbe:
+            exec:
+              command:
+                [
+                  "/opt/mssql-tools18/bin/sqlcmd",
+                  "-S",
+                  "localhost",
+                  "-U",
+                  "sa",
+                  "-P",
+                  "$(MSSQL_SA_PASSWORD)",
+                  "-Q",
+                  "SELECT 1",
+                  "-C",
+                ]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-sqlserver # Quan trọng: App sẽ kết nối qua tên này thay vì IP
+spec:
+  selector:
+    app: sqlserver
+  ports:
+    - protocol: TCP
+      port: 1433
+      targetPort: 1433

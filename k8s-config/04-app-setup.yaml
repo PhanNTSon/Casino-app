@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: casino-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: casino-app
+  template:
+    metadata:
+      labels:
+        app: casino-app
+    spec:
+      # KHỞI TẠO DB: Chạy và kết thúc trước khi App khởi động
+      initContainers:
+      - name: db-init
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: casino-secret
+              key: db-password
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          /opt/mssql-tools18/bin/sqlcmd -S db-sqlserver -U sa -P $(DB_PASSWORD) -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'CASINO_DB') CREATE DATABASE CASINO_DB" -C
+      
+      # CONTAINER CHÍNH
+      containers:
+      - name: casino-backend
+        image: casino-app-image:lastest # Tên image bạn build thủ công
+        ports:
+        - containerPort: 8080
+        envFrom: # Cách nhanh nhất để lấy toàn bộ từ ConfigMap
+        - configMapRef:
+            name: casino-configmap
+        env: # Lấy lẻ từng biến nhạy cảm từ Secret
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: casino-secret
+              key: db-password
+        - name: MAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: casino-secret
+              key: mail-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: casino-app-service
+spec:
+  type: LoadBalancer # Giúp bạn truy cập http://localhost:8080 trên Windows
+  selector:
+    app: casino-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

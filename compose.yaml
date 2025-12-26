@@ -1,0 +1,59 @@
+services:
+  # --- CONTAINER DATABASE (SQL SERVER) ---
+  db-sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: casino-db-container
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+      - MSSQL_PID=Developer
+    healthcheck:
+      # SỬA: Dùng $$ để bảo vệ biến môi trường bên trong CMD
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${DB_PASSWORD}", "-Q", "SELECT 1", "-C"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - casino-network
+
+  # --- CONTAINER KHỞI TẠO DB ---
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - SQLCMDPASSWORD=${DB_PASSWORD}
+    depends_on:
+      db-sqlserver:
+        condition: service_healthy
+    # Không dùng -P nữa, giúp tránh lộ mật khẩu trong log và lỗi escaping
+    command: >
+      /opt/mssql-tools18/bin/sqlcmd -S db-sqlserver -U sa -P ${DB_PASSWORD}
+      -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'CASINO_DB') CREATE DATABASE CASINO_DB" -C
+    networks:
+      - casino-network
+
+  # --- CONTAINER BACKEND (SPRING BOOT) ---
+  casino-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: casino-backend-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      db-init:
+        condition: service_completed_successfully # Rất chuẩn: Chỉ chạy khi init xong
+    environment:
+      - DB_URL=jdbc:sqlserver://db-sqlserver:1433;databaseName=CASINO_DB;encrypt=true;trustServerCertificate=true
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+    networks:
+      - casino-network
+
+networks:
+  casino-network:
+    driver: bridge

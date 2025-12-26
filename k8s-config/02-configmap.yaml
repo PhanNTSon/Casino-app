@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: casino-configmap
+data:
+  # Địa chỉ DB trỏ tới tên Service của SQL Server trong K8s
+  DB_URL: "jdbc:sqlserver://db-sqlserver:1433;databaseName=CASINO_DB;encrypt=true;trustServerCertificate=true"
+  DB_USERNAME: "sa"
+  MAIL_HOST: "smtp.gmail.com"
+  MAIL_USERNAME: "minikie456@gmail.com"

@@ -1,0 +1,59 @@
+
+CREATE TABLE Accounts (
+    [Id] BIGINT IDENTITY(1, 1) PRIMARY KEY,
+    Username NVARCHAR(255) NOT NULL UNIQUE,
+    [Password] VARCHAR(255) NOT NULL,
+    [Status] NVARCHAR(50) DEFAULT 'ACTIVE',
+)
+
+CREATE TABLE Users (
+    [Id] BIGINT IDENTITY(1, 1) PRIMARY KEY,
+    FullName NVARCHAR(255) NOT NULL,
+    WalletBalance DECIMAL(10, 2) DEFAULT 0,
+    Verified BIT DEFAULT 0,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    AccountId BIGINT,
+    FOREIGN KEY (AccountId) REFERENCES Accounts ([Id])
+)
+
+CREATE TABLE VerificationTokens (
+    [Id] BIGINT IDENTITY(1, 1) PRIMARY KEY,
+    [Token] VARCHAR(6) NOT NULL,
+    [ExpiryDate] DATETIME NOT NULL,
+    UserId BIGINT NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users ([Id])
+)
+
+CREATE TABLE Roles (
+    [Id] INT IDENTITY(1, 1) PRIMARY KEY,
+    RoleName NVARCHAR(255) NOT NULL
+)
+
+CREATE TABLE UserRoles (
+    UserId BIGINT,
+    RoleId INT,
+    PRIMARY KEY (UserId, RoleId),
+    FOREIGN KEY (UserId) REFERENCES Users ([Id]),
+    FOREIGN KEY (RoleId) REFERENCES Roles ([Id])
+)
+
+CREATE TABLE Transactions (
+    [Id] BIGINT IDENTITY(1, 1) PRIMARY KEY,
+    Amount DECIMAL(10, 2) NOT NULL,
+    [Type] NVARCHAR(20) NOT NULL,
+    [Status] NVARCHAR(20) NOT NULL,
+    CreatedAt DATETIME,
+    UserId BIGINT,
+    FOREIGN KEY (UserId) REFERENCES Users ([Id])
+)
+
+CREATE TABLE SystemLogs (
+    [Id] BIGINT IDENTITY(1, 1) PRIMARY KEY,
+    Actor NVARCHAR(255) NOT NULL,
+    [Action] NVARCHAR(255) NOT NULL,
+    [Target] NVARCHAR(255) NOT NULL,
+    [Detail] TEXT NOT NULL,
+    CreatedAt DATETIME
+)
+
+INSERT INTO Roles VALUES ('ADMIN'), ('USER')
