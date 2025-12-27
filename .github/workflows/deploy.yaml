@@ -5,7 +5,7 @@ on:
 
 env:
   AWS_REGION: ap-southeast-1
-  EKS_CLUSTER_NAME: casino-cluster
+  EKS_CLUSTER_NAME: casino-app-cluster
   ECR_REPOSITORY: casino-app
   IAM_ROLE_ARN: ${{secrets.AWS_ROLE_ARN}}
 
