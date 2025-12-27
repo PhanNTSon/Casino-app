@@ -30,7 +30,7 @@ spec:
       # CONTAINER CHÍNH
       containers:
       - name: casino-backend
-        image: casino-app-image:lastest # Tên image bạn build thủ công
+        image: ${FULL_IMAGE_NAME}
         ports:
         - containerPort: 8080
         envFrom: # Cách nhanh nhất để lấy toàn bộ từ ConfigMap
