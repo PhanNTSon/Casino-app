@@ -25,7 +25,8 @@ spec:
         command: ["/bin/bash", "-c"]
         args:
         - |
-          /opt/mssql-tools18/bin/sqlcmd -S db-sqlserver -U sa -P ${DB_PASSWORD} -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'CASINO_DB') CREATE DATABASE CASINO_DB" -C
+          sleep 15;
+          /opt/mssql-tools18/bin/sqlcmd -S db-sqlserver -U sa -P "$DB_PASSWORD" -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'CASINO_DB') CREATE DATABASE CASINO_DB" -C
       
       # CONTAINER CHÍNH
       containers:
