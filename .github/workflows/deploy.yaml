@@ -45,8 +45,8 @@ jobs:
       # Bơm Secret vào file YAML và Deploy
       - name: Inject Secrets and Deploy to EKS
         env:
-          DB_PASSWORD_BASE64: ${{ secrets.DB_PASSWORD_BASE64 }}
-          MAIL_PASSWORD_BASE64: ${{ secrets.MAIL_PASSWORD_BASE64 }}
+          DB_PASSWORD_PLAIN: ${{ secrets.DB_PASSWORD_PLAIN }}
+          MAIL_PASSWORD_PLAIN: ${{ secrets.MAIL_PASSWORD_PLAIN }}
         run: |
           envsubst < k8s-config/01-secret.yaml > k8s-config/01-secret.yaml.tmp && mv k8s-config/01-secret.yaml.tmp k8s-config/01-secret.yaml
           
