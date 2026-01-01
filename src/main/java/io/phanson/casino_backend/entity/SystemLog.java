@@ -2,6 +2,8 @@ package io.phanson.casino_backend.entity;
 
 import java.time.LocalDateTime;
 
+import org.springframework.util.Assert;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,14 +13,12 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "SystemLogs", schema = "dbo")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Setter
 public class SystemLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,4 +39,37 @@ public class SystemLog {
 
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setActor(String actor) {
+        Assert.hasText(actor, "Actor cannot be null or empty");
+        Assert.isTrue(actor.length() <= 255, "Actor cannot be more than 255 chars");
+        this.actor = actor;
+    }
+
+    public void setAction(String action) {
+        Assert.hasText(action, "Action cannot be null or empty");
+        Assert.isTrue(action.length() <= 255, "Action cannot be more than 255 chars");
+        this.action = action;
+    }
+
+    public void setTarget(String target) {
+        Assert.hasText(target, "Target cannot be null or empty");
+        Assert.isTrue(target.length() <= 255, "Target cannot be more than 255 chars");
+        this.target = target;
+    }
+
+    public void setDetail(String detail) {
+        Assert.hasText(detail, "Actor cannot be null or empty");
+        Assert.isTrue(detail.length() <= 255, "Actor cannot be more than 255 chars");
+        this.detail = detail;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

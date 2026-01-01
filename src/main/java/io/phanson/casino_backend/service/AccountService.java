@@ -13,6 +13,5 @@ public interface AccountService {
 
     public Account updateAccount(Account account) throws Exception;
 
-    
 
 }

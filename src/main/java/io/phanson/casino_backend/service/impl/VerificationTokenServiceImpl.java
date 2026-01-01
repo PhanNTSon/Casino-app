@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.phanson.casino_backend.dto.request.TokenVerifyRequest;
 import io.phanson.casino_backend.entity.User;
 import io.phanson.casino_backend.entity.VerificationToken;
-import io.phanson.casino_backend.exception.ExpireTokenException;
+import io.phanson.casino_backend.exception.CustomizeException.VerifyTokenExpireException;
 import io.phanson.casino_backend.repository.UserRepo;
 import io.phanson.casino_backend.repository.VerificationTokenRepo;
 import io.phanson.casino_backend.service.VerificationTokenService;
@@ -52,7 +52,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         VerificationToken curUserToken = curU.getVerificationToken();
 
         if (curUserToken.isExpired()) {
-            throw new ExpireTokenException();
+            throw new VerifyTokenExpireException();
         }
 
         if (curUserToken.getToken().equals(dto.getToken())) {
